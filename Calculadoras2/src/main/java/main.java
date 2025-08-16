@@ -1,6 +1,6 @@
-public class Main {
+public class main {
     public static void main(String[] args) {
-        Calculadora calc = new Calculadora();
+        Calculadoras2 calc = new Calculadoras2();
 
         System.out.println("Suma: " + calc.sumar(5, 3));
         System.out.println("Resta: " + calc.restar(10, 4));
