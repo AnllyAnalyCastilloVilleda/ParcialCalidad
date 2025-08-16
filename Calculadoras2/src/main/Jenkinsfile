@@ -1,0 +1,61 @@
+pipeline {
+  agent any
+
+  tools {
+    // Nombres EXACTOS como están registrados en Jenkins (Manage Jenkins > Global Tool Configuration)
+    jdk    'jdk-23'          // o el que tengas configurado
+    maven  'Maven-3.9'       // ajusta al nombre de tu Maven en Jenkins
+  }
+
+  options {
+    // Si usas Pipeline from SCM, puedes dejar checkout scm;
+    // si no, usa la directiva 'git' de abajo.
+    skipDefaultCheckout(true)
+    timestamps()
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        // Si el job es "Pipeline script from SCM", usa:
+        checkout scm
+        // Si es "Pipeline script" pegado en Jenkins, usa en su lugar:
+        // git branch: 'main', url: 'https://github.com/AnllyAnalyCastilloVilleda/ParcialCalidad.git'
+      }
+    }
+
+    stage('Build') {
+      steps {
+        bat 'mvn -B -q clean compile'
+      }
+    }
+
+    stage('Test') {
+      steps {
+        bat 'mvn -B test'
+      }
+      post {
+        always {
+          junit 'Calculadoras2/target/surefire-reports/*.xml' // ajusta si tu módulo se llama distinto
+        }
+      }
+    }
+
+    stage('Package') {
+      steps {
+        bat 'mvn -B -DskipTests package'
+      }
+      post {
+        success {
+          archiveArtifacts artifacts: 'Calculadoras2/target/*.jar', fingerprint: true
+        }
+      }
+    }
+  }
+
+  post {
+    always {
+      cleanWs()
+    }
+  }
+}
